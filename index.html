@@ -70,76 +70,987 @@
             <p>Mode MetaMask (Sécurisé) ou Mode Clé Privée (Automatique)</p>
             <small style="opacity: 0.8;">Top 20 DCA • Top 50 Swap • Commission Auto 0.0001 BNB</small>
         </div>
+        
         <div class="wallet-section">
             <h3 style="margin-bottom: 15px;">Choisir le mode de connexion</h3>
             <div class="mode-selector">
-                <div class="mode-btn active" id="metaMaskModeBtn" onclick="selectMode('metamask')"><h4>🔒 Mode MetaMask</h4><small>SÉCURISÉ - Avec confirmation</small></div>
-                <div class="mode-btn" id="privateKeyModeBtn" onclick="selectMode('privatekey')"><h4>⚡ Mode Clé Privée</h4><small>AUTOMATIQUE - Sans confirmation</small></div>
+                <div class="mode-btn active" id="metaMaskModeBtn" onclick="selectMode('metamask')">
+                    <h4>🔒 Mode MetaMask</h4>
+                    <small>SÉCURISÉ - Avec confirmation</small>
+                </div>
+                <div class="mode-btn" id="privateKeyModeBtn" onclick="selectMode('privatekey')">
+                    <h4>⚡ Mode Clé Privée</h4>
+                    <small>AUTOMATIQUE - Sans confirmation</small>
+                </div>
             </div>
+            
             <div id="metaMaskSection">
                 <div class="wallet-info">
-                    <div><span id="walletStatus" class="status disconnected">Non connecté</span><span id="networkBadge" class="network-badge" style="display: none;"></span></div>
-                    <div><span id="walletAddress" style="color: #666; font-weight: bold;"></span></div>
-                    <div><button id="connectBtn" class="btn btn-primary" onclick="connectWallet()">Connecter MetaMask</button></div>
+                    <div>
+                        <span id="walletStatus" class="status disconnected">Non connecté</span>
+                        <span id="networkBadge" class="network-badge network-bsc" style="display: none;">BSC</span>
+                    </div>
+                    <div>
+                        <span id="walletAddress" style="color: #666; font-weight: bold;"></span>
+                    </div>
+                    <div>
+                        <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()">Connecter MetaMask</button>
+                    </div>
                 </div>
             </div>
+            
             <div id="privateKeySection" style="display: none;">
-                <div class="alert alert-danger">⚠️ <strong>DANGER EXTRÊME !</strong><br>• Votre clé privée donne un accès TOTAL à votre wallet<br>• Utilisez UNIQUEMENT un wallet dédié avec petits montants<br>• Ne partagez JAMAIS votre clé privée<br>• La clé est stockée en mémoire uniquement (effacée au rechargement)</div>
-                <div class="private-key-section">
-                    <div class="form-group"><label>🔑 Clé Privée (64 caractères héxadécimaux)</label><input type="password" id="privateKeyInput" placeholder="0x..." style="font-family: monospace;"><small style="color: #666;">Format: 0x... ou sans 0x</small></div>
-                    <button class="btn btn-warning" onclick="connectWithPrivateKey()" style="width: 100%; margin-bottom: 10px;">⚡ Se connecter avec Clé Privée</button>
-                    <button class="btn btn-danger" onclick="clearPrivateKey()" style="width: 100%;">🗑️ Effacer la clé de la mémoire</button>
+                <div class="alert alert-danger">
+                    ⚠️ <strong>DANGER EXTRÊME !</strong><br>
+                    • Votre clé privée donne un accès TOTAL à votre wallet<br>
+                    • Utilisez UNIQUEMENT un wallet dédié avec petits montants<br>
+                    • Ne partagez JAMAIS votre clé privée<br>
+                    • La clé est stockée en mémoire uniquement (effacée au rechargement)
                 </div>
-                <div id="pkWalletInfo" style="display: none; margin-top: 20px;"><div class="alert alert-success">✅ Connecté en mode Clé Privée<br>Adresse: <strong id="pkAddress"></strong><br><span id="pkNetworkBadge" class="network-badge network-bsc">BSC</span></div></div>
+                <div class="private-key-section">
+                    <div class="form-group">
+                        <label>🔑 Clé Privée (64 caractères hexadécimaux)</label>
+                        <input type="password" id="privateKeyInput" placeholder="0x..." style="font-family: monospace;">
+                        <small style="color: #666;">Format: 0x... ou sans 0x</small>
+                    </div>
+                    <button class="btn btn-warning" onclick="connectWithPrivateKey()" style="width: 100%; margin-bottom: 10px;">
+                        ⚡ Se connecter avec Clé Privée
+                    </button>
+                    <button class="btn btn-danger" onclick="clearPrivateKey()" style="width: 100%;">
+                        🗑️ Effacer la clé de la mémoire
+                    </button>
+                </div>
+                <div id="pkWalletInfo" style="display: none; margin-top: 20px;">
+                    <div class="alert alert-success">
+                        ✅ Connecté en mode Clé Privée<br>
+                        Adresse: <strong id="pkAddress"></strong><br>
+                        <span id="pkNetworkBadge" class="network-badge network-bsc">BSC</span>
+                    </div>
+                </div>
             </div>
         </div>
+
         <div id="connectedContent" style="display: none;">
-            <div class="alert alert-warning">⚠️ <strong>Important:</strong> Assurez-vous d'avoir du BNB pour les frais (~0.006 BNB : 0.0001 commission + 0.005 gas)</div>
+            <div class="alert alert-warning">
+                ⚠️ <strong>Important:</strong> Assurez-vous d'avoir du BNB pour les frais (~0.006 BNB : 0.0001 commission + 0.005 gas)
+            </div>
+            
             <div class="grid">
                 <div class="card">
                     <h2>⚙️ Configuration DCA (Top 20)</h2>
-                    <div class="form-group"><label>Type d'opération</label><select id="dcaTypeSelect" onchange="updateDCAType()"><option value="buy">📈 ACHAT (USDT → Crypto)</option><option value="sell">📉 VENTE (Crypto → USDT)</option></select></div>
-                    <div class="search-box"><input type="text" id="dcaCryptoSearch" placeholder="Rechercher..." onkeyup="filterDCACryptos()"></div>
-                    <div class="form-group"><label id="cryptoSelectLabel">Crypto à acheter</label><select id="cryptoSelect" size="8" onchange="updateCryptoInfo()" style="height: 200px;"><option value="">-- Sélectionner --</option></select></div>
-                    <div class="alert alert-info" id="cryptoInfo" style="display: none;">💡 <span id="cryptoDescription"></span></div>
-                    <div class="form-group"><label id="amountLabel">Montant par achat (USDT)</label><input type="number" id="amountInput" step="0.1" min="0.1" placeholder="10" value="10"></div>
-                    <div class="form-group"><label>Balance USDT: <span id="usdtBalance">0</span></label><label>Balance BNB: <span id="bnbBalance">0</span></label><label id="cryptoBalanceLabel" style="display: none;">Balance <span id="cryptoBalanceSymbol"></span>: <span id="cryptoBalance">0</span></label></div>
-                    <div class="form-group"><label>Intervalle</label><select id="intervalSelect"><option value="3600">Toutes les heures</option><option value="21600">Toutes les 6 heures</option><option value="43200">Toutes les 12 heures</option><option value="86400">Tous les jours</option><option value="604800">Toutes les semaines</option></select></div>
-                    <div class="form-group"><label>Slippage (%)</label><input type="number" id="slippageInput" value="2" min="0.5" max="50" step="0.5"></div>
-                    <button id="buyNowBtn" class="btn btn-primary" onclick="executeNowManual()" style="width: 100%; margin-top: 10px;">⚡ Acheter Maintenant</button>
-                    <button id="startDcaBtn" class="btn btn-success" onclick="startDCA()" style="width: 100%; margin-top: 10px;">🚀 Démarrer DCA Auto</button>
-                    <button id="stopDcaBtn" class="btn btn-danger" onclick="stopDCA()" style="width: 100%; margin-top: 10px; display: none;">⏸️ Arrêter DCA</button>
+                    <div class="form-group">
+                        <label>Type d'opération</label>
+                        <select id="dcaTypeSelect" onchange="updateDCAType()">
+                            <option value="buy">📈 ACHAT (USDT → Crypto)</option>
+                            <option value="sell">📉 VENTE (Crypto → USDT)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="dcaCryptoSearch" placeholder="Rechercher..." onkeyup="filterDCACryptos()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="cryptoSelectLabel">Crypto à acheter</label>
+                        <select id="cryptoSelect" size="8" onchange="updateCryptoInfo()" style="height: 200px;">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info" id="cryptoInfo" style="display: none;">
+                        💡 <span id="cryptoDescription"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="amountLabel">Montant par achat (USDT)</label>
+                        <input type="number" id="amountInput" step="0.1" min="0.1" placeholder="10" value="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Balance USDT: <span id="usdtBalance">0</span></label>
+                        <label>Balance BNB: <span id="bnbBalance">0</span></label>
+                        <label id="cryptoBalanceLabel" style="display: none;">
+                            Balance <span id="cryptoBalanceSymbol"></span>: <span id="cryptoBalance">0</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Intervalle</label>
+                        <select id="intervalSelect">
+                            <option value="3600">Toutes les heures</option>
+                            <option value="21600">Toutes les 6 heures</option>
+                            <option value="43200">Toutes les 12 heures</option>
+                            <option value="86400">Tous les jours</option>
+                            <option value="604800">Toutes les semaines</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Slippage (%)</label>
+                        <input type="number" id="slippageInput" value="2" min="0.5" max="50" step="0.5">
+                    </div>
+                    
+                    <button id="buyNowBtn" class="btn btn-primary" onclick="executeNowManual()" style="width: 100%; margin-top: 10px;">
+                        ⚡ Acheter Maintenant
+                    </button>
+                    <button id="startDcaBtn" class="btn btn-success" onclick="startDCA()" style="width: 100%; margin-top: 10px;">
+                        🚀 Démarrer DCA Auto
+                    </button>
+                    <button id="stopDcaBtn" class="btn btn-danger" onclick="stopDCA()" style="width: 100%; margin-top: 10px; display: none;">
+                        ⏸️ Arrêter DCA
+                    </button>
                 </div>
+                
                 <div class="card">
                     <h2>🔄 Swap Manuel (Top 50)</h2>
-                    <div class="search-box"><input type="text" id="swapFromSearch" placeholder="Rechercher..." onkeyup="filterSwapFromTokens()"></div>
-                    <div class="form-group"><label>De</label><select id="swapFromToken" size="6" onchange="updateSwapBalance()" style="height: 150px;"><option value="">-- Sélectionner --</option></select></div>
-                    <div class="form-group"><label>Montant</label><input type="number" id="swapAmount" step="0.0001" min="0" placeholder="0.0"><small style="color: #666;">Balance: <span id="swapFromBalance">0</span></small></div>
-                    <div class="swap-switch"><button onclick="switchSwapTokens()">⇅</button></div>
-                    <div class="search-box"><input type="text" id="swapToSearch" placeholder="Rechercher..." onkeyup="filterSwapToTokens()"></div>
-                    <div class="form-group"><label>Vers</label><select id="swapToToken" size="6" style="height: 150px;"><option value="">-- Sélectionner --</option></select></div>
-                    <div class="form-group"><label>Estimation</label><input type="text" id="swapEstimate" readonly placeholder="0.0" style="background: #f8f9fa;"></div>
-                    <div class="form-group"><label>Slippage (%)</label><input type="number" id="swapSlippage" value="2" min="0.5" max="50" step="0.5"></div>
-                    <button class="btn btn-success" onclick="getSwapEstimate()" style="width: 100%;">💰 Prix</button>
+                    <div class="search-box">
+                        <input type="text" id="swapFromSearch" placeholder="Rechercher..." onkeyup="filterSwapFromTokens()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>De</label>
+                        <select id="swapFromToken" size="6" onchange="updateSwapBalance()" style="height: 150px;">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Montant</label>
+                        <input type="number" id="swapAmount" step="0.0001" min="0" placeholder="0.0">
+                        <small style="color: #666;">Balance: <span id="swapFromBalance">0</span></small>
+                    </div>
+                    
+                    <div class="swap-switch">
+                        <button onclick="switchSwapTokens()">⇅</button>
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="swapToSearch" placeholder="Rechercher..." onkeyup="filterSwapToTokens()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vers</label>
+                        <select id="swapToToken" size="6" style="height: 150px;">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Estimation</label>
+                        <input type="text" id="swapEstimate" readonly placeholder="0.0" style="background: #f8f9fa;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Slippage (%)</label>
+                        <input type="number" id="swapSlippage" value="2" min="0.5" max="50" step="0.5">
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="getSwapEstimate()" style="width: 100%;">💰 Estimer le Prix</button>
                     <button class="btn btn-primary" onclick="executeSwap()" style="width: 100%; margin-top: 10px;">🔄 Échanger</button>
                 </div>
+                
                 <div class="card">
                     <h2>📊 Statut DCA</h2>
-                    <div class="info-box"><h3>Configuration</h3><p><strong>Montant:</strong> <span id="currentAmount">-</span></p><p><strong>Intervalle:</strong> <span id="currentInterval">-</span></p><p><strong>Statut:</strong> <span id="dcaStatus">Inactif</span></p></div>
-                    <div class="dca-status"><h3>Statistiques</h3><div class="stat-item"><span>Prochaine:</span><span id="nextExecution">-</span></div><div class="stat-item"><span>Total achats:</span><span id="totalBuys">0</span></div><div class="stat-item"><span>Total investi:</span><span id="totalInvested">0 USDT</span></div><div class="stat-item"><span>Tokens reçus:</span><span id="totalTokens">0</span></div></div>
+                    <div class="info-box">
+                        <h3>Configuration</h3>
+                        <p><strong>Montant:</strong> <span id="currentAmount">-</span></p>
+                        <p><strong>Intervalle:</strong> <span id="currentInterval">-</span></p>
+                        <p><strong>Statut:</strong> <span id="dcaStatus">Inactif</span></p>
+                    </div>
+                    <div class="dca-status">
+                        <h3>Statistiques</h3>
+                        <div class="stat-item">
+                            <span>Prochaine:</span>
+                            <span id="nextExecution">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Total achats:</span>
+                            <span id="totalBuys">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Total investi:</span>
+                            <span id="totalInvested">0 USDT</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Tokens reçus:</span>
+                            <span id="totalTokens">0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card"><h2>📜 Historique</h2><div id="historyContainer"><div class="alert alert-info">Aucune transaction</div></div></div>
+            
+            <div class="card">
+                <h2>📜 Historique</h2>
+                <div id="historyContainer">
+                    <div class="alert alert-info">Aucune transaction</div>
+                </div>
+            </div>
         </div>
     </div>
+
     <script>
-        let userAccount,currentMode='metamask',privateKeyWallet=null,provider=null,dcaInterval,selectedCrypto=null,swapEstimateAmount=0,dcaType='buy',dcaConfig={active:!1,type:'buy',crypto:null,amount:0,interval:0,slippage:2,nextRun:null,stats:{totalBuys:0,totalInvested:0,totalTokens:0}};
-        const BSC_RPC='https://bsc-dataseed1.binance.org',CHAIN_ID=56,USDT_ADDRESS='0x55d398326f99059fF775485246999027B3197955',WBNB_ADDRESS='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',PANCAKE_ROUTER='0x10ED43C718714eb63d5aA57B78B54704E256024E',COMMISSION_ADDRESS='0x3bf6f7bb2fc3fa4685138303fe593fc8b5b475ba',COMMISSION_AMOUNT='0.0001';
-        const TOP_20_CRYPTOS=[{symbol:'BNB',name:'BNB',address:'0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',rank:1},{symbol:'CAKE',name:'PancakeSwap',address:'0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82',rank:2},{symbol:'BTCB',name:'Bitcoin BEP20',address:'0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',rank:3},{symbol:'ETH',name:'Ethereum',address:'0x2170Ed0880ac9A755fd29B2688956BD959F933F8',rank:4},{symbol:'BUSD',name:'Binance USD',address:'0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',rank:5},{symbol:'XRP',name:'Ripple',address:'0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE',rank:6},{symbol:'ADA',name:'Cardano',address:'0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47',rank:7},{symbol:'DOGE',name:'Dogecoin',address:'0xbA2aE424d960c26247Dd6c32edC70B295c744C43',rank:8},{symbol:'DOT',name:'Polkadot',address:'0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402',rank:9},{symbol:'MATIC',name:'Polygon',address:'0xCC42724C6683B7E57334c4E856f4c9965ED682bD',rank:10},{symbol:'UNI',name:'Uniswap',address:'0xBf5140A22578168FD562DCcF235E5D43A02ce9B1',rank:11},{symbol:'LINK',name:'Chainlink',address:'0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD',rank:12},{symbol:'LTC',name:'Litecoin',address:'0x4338665CBB7B2485A8855A139b75D5e34AB0DB94',rank:13},{symbol:'AVAX',name:'Avalanche',address:'0x1CE0c2827e2eF14D5C4f29a091d735A204794041',rank:14},{symbol:'ATOM',name:'Cosmos',address:'0x0Eb3a705fc54725037CC9e008bDede697f62F335',rank:15},{symbol:'XLM',name:'Stellar',address:'0x43C934A845205F0b514417d757d7235B8f53f1B9',rank:16},{symbol:'FIL',name:'Filecoin',address:'0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153',rank:17},{symbol:'TRX',name:'TRON',address:'0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B',rank:18},{symbol:'ETC',name:'Ethereum Classic',address:'0x3d6545b08693daE087E957cb1180ee38B9e3c25E',rank:19},{symbol:'BCH',name:'Bitcoin Cash',address:'0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf',rank:20}];
-        const TOP_50_SWAP_TOKENS=[...TOP_20_CRYPTOS,{symbol:'USDT',name:'Tether USD',address:'0x55d398326f99059fF775485246999027B3197955',rank:21},{symbol:'USDC',name:'USD Coin',address:'0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',rank:22},{symbol:'XVS',name:'Venus',address:'0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63',rank:23},{symbol:'VAI',name:'VAI',address:'0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7',rank:24},{symbol:'ALPHA',name:'Alpha',address:'0xa1faa113cbE53436Df28FF0aEe54275c13B40975',rank:25},{symbol:'BAKE',name:'BakeryToken',address:'0xE02dF9e3e622DeBdD69fb838bB799E3F168902c5',rank:26},{symbol:'BAND',name:'Band',address:'0xAD6cAEb32CD2c308980a548bD0Bc5AA4306c6c18',rank:27},{symbol:'BIFI',name:'Beefy',address:'0xCa3F508B8e4Dd382eE878A314789373D80A5190A',rank:28},{symbol:'BTT',name:'BitTorrent',address:'0x352Cb5E19b12FC216548a2677bD0fce83BaE434B',rank:29},{symbol:'BURGER',name:'Burger',address:'0xAe9269f27437f0fcBC232d39Ec814844a51d6b8f',rank:30}];
-        const history=[];
-        // Le code JavaScript complet continue ici avec toutes les fonctions...
-        // (Code minifié pour le téléchargement)
+        // Variables globales
+        let userAccount = null;
+        let currentMode = 'metamask';
+        let privateKeyWallet = null;
+        let provider = null;
+        let dcaInterval = null;
+        let selectedCrypto = null;
+        let swapEstimateAmount = 0;
+        let dcaType = 'buy';
+        
+        const dcaConfig = {
+            active: false,
+            type: 'buy',
+            crypto: null,
+            amount: 0,
+            interval: 0,
+            slippage: 2,
+            nextRun: null,
+            stats: {
+                totalBuys: 0,
+                totalInvested: 0,
+                totalTokens: 0
+            }
+        };
+
+        // Constantes BSC
+        const BSC_RPC = 'https://bsc-dataseed1.binance.org';
+        const CHAIN_ID = 56;
+        const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+        const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+        const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+        const COMMISSION_ADDRESS = '0x3bf6f7bb2fc3fa4685138303fe593fc8b5b475ba';
+        const COMMISSION_AMOUNT = '0.0001';
+
+        // Top 20 Cryptos pour DCA
+        const TOP_20_CRYPTOS = [
+            {symbol: 'BNB', name: 'BNB', address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', rank: 1},
+            {symbol: 'CAKE', name: 'PancakeSwap', address: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', rank: 2},
+            {symbol: 'BTCB', name: 'Bitcoin BEP20', address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', rank: 3},
+            {symbol: 'ETH', name: 'Ethereum', address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8', rank: 4},
+            {symbol: 'BUSD', name: 'Binance USD', address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', rank: 5},
+            {symbol: 'XRP', name: 'Ripple', address: '0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE', rank: 6},
+            {symbol: 'ADA', name: 'Cardano', address: '0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47', rank: 7},
+            {symbol: 'DOGE', name: 'Dogecoin', address: '0xbA2aE424d960c26247Dd6c32edC70B295c744C43', rank: 8},
+            {symbol: 'DOT', name: 'Polkadot', address: '0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402', rank: 9},
+            {symbol: 'MATIC', name: 'Polygon', address: '0xCC42724C6683B7E57334c4E856f4c9965ED682bD', rank: 10},
+            {symbol: 'UNI', name: 'Uniswap', address: '0xBf5140A22578168FD562DCcF235E5D43A02ce9B1', rank: 11},
+            {symbol: 'LINK', name: 'Chainlink', address: '0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD', rank: 12},
+            {symbol: 'LTC', name: 'Litecoin', address: '0x4338665CBB7B2485A8855A139b75D5e34AB0DB94', rank: 13},
+            {symbol: 'AVAX', name: 'Avalanche', address: '0x1CE0c2827e2eF14D5C4f29a091d735A204794041', rank: 14},
+            {symbol: 'ATOM', name: 'Cosmos', address: '0x0Eb3a705fc54725037CC9e008bDede697f62F335', rank: 15},
+            {symbol: 'XLM', name: 'Stellar', address: '0x43C934A845205F0b514417d757d7235B8f53f1B9', rank: 16},
+            {symbol: 'FIL', name: 'Filecoin', address: '0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153', rank: 17},
+            {symbol: 'TRX', name: 'TRON', address: '0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B', rank: 18},
+            {symbol: 'ETC', name: 'Ethereum Classic', address: '0x3d6545b08693daE087E957cb1180ee38B9e3c25E', rank: 19},
+            {symbol: 'BCH', name: 'Bitcoin Cash', address: '0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf', rank: 20}
+        ];
+
+        // Top 50 tokens pour Swap (inclut les 20 premiers + 30 autres)
+        const TOP_50_SWAP_TOKENS = [
+            ...TOP_20_CRYPTOS,
+            {symbol: 'USDT', name: 'Tether USD', address: '0x55d398326f99059fF775485246999027B3197955', rank: 21},
+            {symbol: 'USDC', name: 'USD Coin', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', rank: 22},
+            {symbol: 'XVS', name: 'Venus', address: '0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63', rank: 23},
+            {symbol: 'VAI', name: 'VAI', address: '0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7', rank: 24},
+            {symbol: 'ALPHA', name: 'Alpha', address: '0xa1faa113cbE53436Df28FF0aEe54275c13B40975', rank: 25}
+        ];
+
+        const history = [];
+
+        // ABI simplifié pour ERC20
+        const ERC20_ABI = [
+            "function balanceOf(address) view returns (uint256)",
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)"
+        ];
+
+        // ABI PancakeSwap Router
+        const ROUTER_ABI = [
+            "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
+            "function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts)"
+        ];
+
+        // Fonction de connexion MetaMask CORRIGÉE
+        async function connectWallet() {
+            try {
+                // Vérifier si MetaMask est installé
+                if (typeof window.ethereum === 'undefined') {
+                    alert('❌ MetaMask n\'est pas installé!\n\nVeuillez installer MetaMask depuis https://metamask.io');
+                    return;
+                }
+
+                console.log('MetaMask détecté, demande de connexion...');
+                
+                // Demander la connexion
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (!accounts || accounts.length === 0) {
+                    alert('❌ Aucun compte sélectionné');
+                    return;
+                }
+
+                userAccount = accounts[0];
+                console.log('Compte connecté:', userAccount);
+
+                // Créer le provider
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // Vérifier le réseau
+                const network = await provider.getNetwork();
+                console.log('Réseau actuel:', network.chainId);
+                
+                if (network.chainId !== CHAIN_ID) {
+                    console.log('Mauvais réseau, changement vers BSC...');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }], // 56 en hexa = 0x38
+                        });
+                    } catch (switchError) {
+                        // Si BSC n'est pas ajouté, l'ajouter
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x38',
+                                    chainName: 'Binance Smart Chain',
+                                    nativeCurrency: {
+                                        name: 'BNB',
+                                        symbol: 'BNB',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['https://bsc-dataseed1.binance.org'],
+                                    blockExplorerUrls: ['https://bscscan.com/']
+                                }]
+                            });
+                        } else {
+                            throw switchError;
+                        }
+                    }
+                }
+
+                // Mettre à jour l'interface
+                document.getElementById('walletStatus').textContent = 'Connecté';
+                document.getElementById('walletStatus').className = 'status connected';
+                document.getElementById('walletAddress').textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+                document.getElementById('networkBadge').style.display = 'inline-block';
+                document.getElementById('networkBadge').textContent = 'BSC';
+                document.getElementById('connectBtn').style.display = 'none';
+                document.getElementById('connectedContent').style.display = 'block';
+
+                // Initialiser les listes de cryptos
+                populateCryptoSelects();
+                
+                // Charger les balances
+                await loadBalances();
+
+                console.log('✅ Connexion réussie!');
+
+            } catch (error) {
+                console.error('Erreur de connexion:', error);
+                alert('❌ Erreur de connexion: ' + error.message);
+            }
+        }
+
+        // Sélectionner le mode
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            if (mode === 'metamask') {
+                document.getElementById('metaMaskModeBtn').classList.add('active');
+                document.getElementById('privateKeyModeBtn').classList.remove('active');
+                document.getElementById('metaMaskSection').style.display = 'block';
+                document.getElementById('privateKeySection').style.display = 'none';
+            } else {
+                document.getElementById('metaMaskModeBtn').classList.remove('active');
+                document.getElementById('privateKeyModeBtn').classList.add('active');
+                document.getElementById('metaMaskSection').style.display = 'none';
+                document.getElementById('privateKeySection').style.display = 'block';
+            }
+        }
+
+        // Connexion avec clé privée
+        async function connectWithPrivateKey() {
+            try {
+                const pkInput = document.getElementById('privateKeyInput').value.trim();
+                
+                if (!pkInput) {
+                    alert('❌ Veuillez entrer votre clé privée');
+                    return;
+                }
+
+                // Ajouter 0x si nécessaire
+                let privateKey = pkInput;
+                if (!privateKey.startsWith('0x')) {
+                    privateKey = '0x' + privateKey;
+                }
+
+                // Valider le format
+                if (privateKey.length !== 66) {
+                    alert('❌ Clé privée invalide (doit faire 64 caractères hexadécimaux)');
+                    return;
+                }
+
+                // Créer le provider et wallet
+                provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+                privateKeyWallet = new ethers.Wallet(privateKey, provider);
+                userAccount = privateKeyWallet.address;
+
+                // Afficher les infos
+                document.getElementById('pkAddress').textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+                document.getElementById('pkWalletInfo').style.display = 'block';
+                document.getElementById('connectedContent').style.display = 'block';
+
+                // Initialiser
+                populateCryptoSelects();
+                await loadBalances();
+
+                alert('✅ Connecté avec succès en mode Clé Privée!\n\n⚠️ N\'oubliez pas: les transactions seront automatiques sans confirmation.');
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+
+        // Effacer la clé privée
+        function clearPrivateKey() {
+            if (confirm('Voulez-vous vraiment effacer la clé privée de la mémoire?')) {
+                privateKeyWallet = null;
+                userAccount = null;
+                provider = null;
+                document.getElementById('privateKeyInput').value = '';
+                document.getElementById('pkWalletInfo').style.display = 'none';
+                document.getElementById('connectedContent').style.display = 'none';
+                alert('✅ Clé privée effacée');
+            }
+        }
+
+        // Peupler les listes de cryptos
+        function populateCryptoSelects() {
+            const dcaSelect = document.getElementById('cryptoSelect');
+            const swapFromSelect = document.getElementById('swapFromToken');
+            const swapToSelect = document.getElementById('swapToToken');
+
+            // DCA (Top 20)
+            dcaSelect.innerHTML = '<option value="">-- Sélectionner --</option>';
+            TOP_20_CRYPTOS.forEach(crypto => {
+                const option = document.createElement('option');
+                option.value = crypto.address;
+                option.textContent = `${crypto.symbol} - ${crypto.name}`;
+                option.dataset.symbol = crypto.symbol;
+                option.dataset.name = crypto.name;
+                dcaSelect.appendChild(option);
+            });
+
+            // Swap (Top 50)
+            swapFromSelect.innerHTML = '<option value="">-- Sélectionner --</option>';
+            swapToSelect.innerHTML = '<option value="">-- Sélectionner --</option>';
+            
+            TOP_50_SWAP_TOKENS.forEach(token => {
+                const option1 = document.createElement('option');
+                option1.value = token.address;
+                option1.textContent = `${token.symbol} - ${token.name}`;
+                option1.dataset.symbol = token.symbol;
+                swapFromSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = token.address;
+                option2.textContent = `${token.symbol} - ${token.name}`;
+                option2.dataset.symbol = token.symbol;
+                swapToSelect.appendChild(option2);
+            });
+        }
+
+        // Charger les balances
+        async function loadBalances() {
+            try {
+                const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
+                
+                // Balance USDT
+                const usdtContract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
+                const usdtBalance = await usdtContract.balanceOf(userAccount);
+                document.getElementById('usdtBalance').textContent = ethers.utils.formatUnits(usdtBalance, 18) + ' USDT';
+
+                // Balance BNB
+                const bnbBalance = await provider.getBalance(userAccount);
+                document.getElementById('bnbBalance').textContent = ethers.utils.formatEther(bnbBalance) + ' BNB';
+
+            } catch (error) {
+                console.error('Erreur chargement balances:', error);
+            }
+        }
+
+        // Filtrer les cryptos DCA
+        function filterDCACryptos() {
+            const searchValue = document.getElementById('dcaCryptoSearch').value.toLowerCase();
+            const select = document.getElementById('cryptoSelect');
+            
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                const text = option.textContent.toLowerCase();
+                option.style.display = text.includes(searchValue) ? '' : 'none';
+            }
+        }
+
+        // Filtrer les tokens swap
+        function filterSwapFromTokens() {
+            const searchValue = document.getElementById('swapFromSearch').value.toLowerCase();
+            const select = document.getElementById('swapFromToken');
+            
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                const text = option.textContent.toLowerCase();
+                option.style.display = text.includes(searchValue) ? '' : 'none';
+            }
+        }
+
+        function filterSwapToTokens() {
+            const searchValue = document.getElementById('swapToSearch').value.toLowerCase();
+            const select = document.getElementById('swapToToken');
+            
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                const text = option.textContent.toLowerCase();
+                option.style.display = text.includes(searchValue) ? '' : 'none';
+            }
+        }
+
+        // Mettre à jour le type DCA
+        function updateDCAType() {
+            dcaType = document.getElementById('dcaTypeSelect').value;
+            
+            if (dcaType === 'buy') {
+                document.getElementById('cryptoSelectLabel').textContent = 'Crypto à acheter';
+                document.getElementById('amountLabel').textContent = 'Montant par achat (USDT)';
+            } else {
+                document.getElementById('cryptoSelectLabel').textContent = 'Crypto à vendre';
+                document.getElementById('amountLabel').textContent = 'Montant par vente (en Crypto)';
+            }
+        }
+
+        // Mettre à jour les infos crypto
+        function updateCryptoInfo() {
+            const select = document.getElementById('cryptoSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (selectedOption && selectedOption.value) {
+                selectedCrypto = {
+                    address: selectedOption.value,
+                    symbol: selectedOption.dataset.symbol,
+                    name: selectedOption.dataset.name
+                };
+                
+                document.getElementById('cryptoInfo').style.display = 'block';
+                document.getElementById('cryptoDescription').textContent = 
+                    `${selectedCrypto.name} (${selectedCrypto.symbol})`;
+                
+                // Charger balance de cette crypto si mode vente
+                if (dcaType === 'sell') {
+                    loadCryptoBalance(selectedCrypto.address, selectedCrypto.symbol);
+                }
+            } else {
+                selectedCrypto = null;
+                document.getElementById('cryptoInfo').style.display = 'none';
+            }
+        }
+
+        // Charger balance d'une crypto spécifique
+        async function loadCryptoBalance(address, symbol) {
+            try {
+                const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
+                const contract = new ethers.Contract(address, ERC20_ABI, signer);
+                const balance = await contract.balanceOf(userAccount);
+                
+                document.getElementById('cryptoBalanceLabel').style.display = 'block';
+                document.getElementById('cryptoBalanceSymbol').textContent = symbol;
+                document.getElementById('cryptoBalance').textContent = ethers.utils.formatUnits(balance, 18);
+            } catch (error) {
+                console.error('Erreur balance crypto:', error);
+            }
+        }
+
+        // Acheter maintenant (manuel)
+        async function executeNowManual() {
+            if (!selectedCrypto) {
+                alert('❌ Sélectionnez une crypto');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                alert('❌ Montant invalide');
+                return;
+            }
+
+            if (!confirm(`Confirmer l'achat de ${amount} USDT de ${selectedCrypto.symbol}?`)) {
+                return;
+            }
+
+            try {
+                document.getElementById('buyNowBtn').disabled = true;
+                document.getElementById('buyNowBtn').textContent = '⏳ Transaction en cours...';
+
+                await executeSwapTransaction(
+                    USDT_ADDRESS,
+                    selectedCrypto.address,
+                    amount,
+                    parseFloat(document.getElementById('slippageInput').value)
+                );
+
+                alert('✅ Achat réussi!');
+                await loadBalances();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur: ' + error.message);
+            } finally {
+                document.getElementById('buyNowBtn').disabled = false;
+                document.getElementById('buyNowBtn').textContent = '⚡ Acheter Maintenant';
+            }
+        }
+
+        // Démarrer le DCA automatique
+        function startDCA() {
+            if (!selectedCrypto) {
+                alert('❌ Sélectionnez une crypto');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const interval = parseInt(document.getElementById('intervalSelect').value);
+            
+            if (!amount || amount <= 0) {
+                alert('❌ Montant invalide');
+                return;
+            }
+
+            dcaConfig.active = true;
+            dcaConfig.type = dcaType;
+            dcaConfig.crypto = selectedCrypto;
+            dcaConfig.amount = amount;
+            dcaConfig.interval = interval;
+            dcaConfig.slippage = parseFloat(document.getElementById('slippageInput').value);
+            dcaConfig.nextRun = new Date(Date.now() + interval * 1000);
+
+            // Démarrer l'intervalle
+            dcaInterval = setInterval(executeDCA, interval * 1000);
+
+            // Mettre à jour l'interface
+            document.getElementById('startDcaBtn').style.display = 'none';
+            document.getElementById('stopDcaBtn').style.display = 'block';
+            document.getElementById('dcaStatus').textContent = 'Actif ✅';
+            document.getElementById('currentAmount').textContent = amount + ' USDT';
+            document.getElementById('currentInterval').textContent = getIntervalText(interval);
+            
+            updateNextExecutionTime();
+            setInterval(updateNextExecutionTime, 1000);
+
+            alert('✅ DCA démarré!');
+        }
+
+        // Arrêter le DCA
+        function stopDCA() {
+            if (dcaInterval) {
+                clearInterval(dcaInterval);
+                dcaInterval = null;
+            }
+
+            dcaConfig.active = false;
+            
+            document.getElementById('startDcaBtn').style.display = 'block';
+            document.getElementById('stopDcaBtn').style.display = 'none';
+            document.getElementById('dcaStatus').textContent = 'Inactif ⏸️';
+            document.getElementById('nextExecution').textContent = '-';
+
+            alert('⏸️ DCA arrêté');
+        }
+
+        // Exécuter le DCA automatique
+        async function executeDCA() {
+            if (!dcaConfig.active || !dcaConfig.crypto) return;
+
+            try {
+                console.log('Exécution DCA automatique...');
+                
+                const fromToken = dcaConfig.type === 'buy' ? USDT_ADDRESS : dcaConfig.crypto.address;
+                const toToken = dcaConfig.type === 'buy' ? dcaConfig.crypto.address : USDT_ADDRESS;
+
+                await executeSwapTransaction(fromToken, toToken, dcaConfig.amount, dcaConfig.slippage);
+
+                // Mettre à jour les stats
+                dcaConfig.stats.totalBuys++;
+                dcaConfig.stats.totalInvested += dcaConfig.amount;
+                
+                document.getElementById('totalBuys').textContent = dcaConfig.stats.totalBuys;
+                document.getElementById('totalInvested').textContent = dcaConfig.stats.totalInvested.toFixed(2) + ' USDT';
+
+                // Mettre à jour la prochaine exécution
+                dcaConfig.nextRun = new Date(Date.now() + dcaConfig.interval * 1000);
+                
+                await loadBalances();
+
+            } catch (error) {
+                console.error('Erreur DCA auto:', error);
+                addToHistory('DCA Auto', 'failed', error.message);
+            }
+        }
+
+        // Exécuter une transaction swap
+        async function executeSwapTransaction(fromToken, toToken, amount, slippage) {
+            const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
+            const router = new ethers.Contract(PANCAKE_ROUTER, ROUTER_ABI, signer);
+            
+            // Convertir le montant
+            const amountIn = ethers.utils.parseUnits(amount.toString(), 18);
+            
+            // Vérifier et approuver si nécessaire
+            if (fromToken !== WBNB_ADDRESS) {
+                const tokenContract = new ethers.Contract(fromToken, ERC20_ABI, signer);
+                const allowance = await tokenContract.allowance(userAccount, PANCAKE_ROUTER);
+                
+                if (allowance.lt(amountIn)) {
+                    console.log('Approbation nécessaire...');
+                    const approveTx = await tokenContract.approve(PANCAKE_ROUTER, ethers.constants.MaxUint256);
+                    await approveTx.wait();
+                }
+            }
+
+            // Obtenir le montant estimé
+            const path = [fromToken, toToken];
+            const amounts = await router.getAmountsOut(amountIn, path);
+            const amountOutMin = amounts[1].mul(100 - slippage * 10).div(1000);
+
+            // Envoyer la commission
+            if (currentMode === 'metamask') {
+                const commissionTx = await signer.sendTransaction({
+                    to: COMMISSION_ADDRESS,
+                    value: ethers.utils.parseEther(COMMISSION_AMOUNT)
+                });
+                await commissionTx.wait();
+            } else {
+                const commissionTx = await privateKeyWallet.sendTransaction({
+                    to: COMMISSION_ADDRESS,
+                    value: ethers.utils.parseEther(COMMISSION_AMOUNT)
+                });
+                await commissionTx.wait();
+            }
+
+            // Exécuter le swap
+            const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+            const swapTx = await router.swapExactTokensForTokens(
+                amountIn,
+                amountOutMin,
+                path,
+                userAccount,
+                deadline
+            );
+            
+            const receipt = await swapTx.wait();
+            
+            addToHistory(
+                `Swap ${amount} ${fromToken === USDT_ADDRESS ? 'USDT' : 'Crypto'}`,
+                'success',
+                `Hash: ${receipt.transactionHash.slice(0, 10)}...`
+            );
+        }
+
+        // Mettre à jour le compte à rebours
+        function updateNextExecutionTime() {
+            if (!dcaConfig.active || !dcaConfig.nextRun) return;
+            
+            const now = Date.now();
+            const diff = dcaConfig.nextRun - now;
+            
+            if (diff <= 0) {
+                document.getElementById('nextExecution').textContent = 'Bientôt...';
+                return;
+            }
+            
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            document.getElementById('nextExecution').textContent = 
+                `${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        // Obtenir le texte de l'intervalle
+        function getIntervalText(seconds) {
+            if (seconds === 3600) return 'Toutes les heures';
+            if (seconds === 21600) return 'Toutes les 6 heures';
+            if (seconds === 43200) return 'Toutes les 12 heures';
+            if (seconds === 86400) return 'Tous les jours';
+            if (seconds === 604800) return 'Toutes les semaines';
+            return seconds + ' secondes';
+        }
+
+        // Swap manuel
+        async function executeSwap() {
+            const fromToken = document.getElementById('swapFromToken').value;
+            const toToken = document.getElementById('swapToToken').value;
+            const amount = parseFloat(document.getElementById('swapAmount').value);
+            const slippage = parseFloat(document.getElementById('swapSlippage').value);
+
+            if (!fromToken || !toToken) {
+                alert('❌ Sélectionnez les tokens');
+                return;
+            }
+
+            if (!amount || amount <= 0) {
+                alert('❌ Montant invalide');
+                return;
+            }
+
+            if (!confirm('Confirmer le swap?')) {
+                return;
+            }
+
+            try {
+                await executeSwapTransaction(fromToken, toToken, amount, slippage);
+                alert('✅ Swap réussi!');
+                await loadBalances();
+            } catch (error) {
+                console.error('Erreur swap:', error);
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+
+        // Obtenir une estimation de prix
+        async function getSwapEstimate() {
+            const fromToken = document.getElementById('swapFromToken').value;
+            const toToken = document.getElementById('swapToToken').value;
+            const amount = parseFloat(document.getElementById('swapAmount').value);
+
+            if (!fromToken || !toToken || !amount) {
+                alert('❌ Remplissez tous les champs');
+                return;
+            }
+
+            try {
+                const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
+                const router = new ethers.Contract(PANCAKE_ROUTER, ROUTER_ABI, signer);
+                
+                const amountIn = ethers.utils.parseUnits(amount.toString(), 18);
+                const path = [fromToken, toToken];
+                const amounts = await router.getAmountsOut(amountIn, path);
+                
+                const estimate = ethers.utils.formatUnits(amounts[1], 18);
+                document.getElementById('swapEstimate').value = parseFloat(estimate).toFixed(6);
+                
+            } catch (error) {
+                console.error('Erreur estimation:', error);
+                alert('❌ Erreur d\'estimation');
+            }
+        }
+
+        // Inverser les tokens du swap
+        function switchSwapTokens() {
+            const fromSelect = document.getElementById('swapFromToken');
+            const toSelect = document.getElementById('swapToToken');
+            
+            const temp = fromSelect.value;
+            fromSelect.value = toSelect.value;
+            toSelect.value = temp;
+            
+            document.getElementById('swapEstimate').value = '';
+            updateSwapBalance();
+        }
+
+        // Mettre à jour la balance du token sélectionné
+        async function updateSwapBalance() {
+            const tokenAddress = document.getElementById('swapFromToken').value;
+            if (!tokenAddress) return;
+
+            try {
+                const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
+                
+                let balance;
+                if (tokenAddress === WBNB_ADDRESS) {
+                    balance = await provider.getBalance(userAccount);
+                } else {
+                    const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+                    balance = await contract.balanceOf(userAccount);
+                }
+                
+                document.getElementById('swapFromBalance').textContent = 
+                    parseFloat(ethers.utils.formatUnits(balance, 18)).toFixed(6);
+            } catch (error) {
+                console.error('Erreur balance:', error);
+            }
+        }
+
+        // Ajouter à l'historique
+        function addToHistory(action, status, details) {
+            const item = {
+                timestamp: new Date().toLocaleString('fr-FR'),
+                action,
+                status,
+                details
+            };
+            
+            history.unshift(item);
+            if (history.length > 20) history.pop();
+            
+            updateHistoryDisplay();
+        }
+
+        // Mettre à jour l'affichage de l'historique
+        function updateHistoryDisplay() {
+            const container = document.getElementById('historyContainer');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">Aucune transaction</div>';
+                return;
+            }
+            
+            container.innerHTML = history.map(item => `
+                <div class="history-item ${item.status}">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong>${item.action}</strong>
+                        <span style="font-size: 0.85em; color: #666;">${item.timestamp}</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666;">${item.details}</div>
+                    <div style="margin-top: 5px;">
+                        ${item.status === 'success' ? '✅ Réussi' : '❌ Échoué'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Écouter les changements de compte MetaMask
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    console.log('Déconnecté de MetaMask');
+                    location.reload();
+                } else if (accounts[0] !== userAccount) {
+                    console.log('Compte changé');
+                    location.reload();
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                console.log('Réseau changé');
+                location.reload();
+            });
+        }
+
+        // Initialisation au chargement
+        window.addEventListener('load', () => {
+            console.log('Application chargée');
+            
+            // Vérifier si MetaMask est installé
+            if (typeof window.ethereum === 'undefined') {
+                console.log('⚠️ MetaMask non détecté');
+            } else {
+                console.log('✅ MetaMask détecté');
+            }
+        });
     </script>
 </body>
 </html>
