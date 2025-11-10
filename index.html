@@ -369,6 +369,8 @@
         // ABI PancakeSwap Router
         const ROUTER_ABI = [
             "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
+            "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)",
+            "function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
             "function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts)"
         ];
 
@@ -805,58 +807,147 @@
             const signer = currentMode === 'metamask' ? provider.getSigner() : privateKeyWallet;
             const router = new ethers.Contract(PANCAKE_ROUTER, ROUTER_ABI, signer);
             
+            console.log('=== DÉBUT SWAP ===');
+            console.log('From:', fromToken);
+            console.log('To:', toToken);
+            console.log('Amount:', amount);
+            console.log('Slippage:', slippage);
+            
             // Convertir le montant
             const amountIn = ethers.utils.parseUnits(amount.toString(), 18);
+            console.log('Amount In (wei):', amountIn.toString());
             
-            // Vérifier et approuver si nécessaire
+            // Construire le chemin (path) via WBNB si nécessaire
+            let path;
+            const needsWBNB = fromToken !== WBNB_ADDRESS && toToken !== WBNB_ADDRESS && 
+                              fromToken !== toToken;
+            
+            if (needsWBNB) {
+                // Route via WBNB: Token A -> WBNB -> Token B
+                path = [fromToken, WBNB_ADDRESS, toToken];
+                console.log('Path (via WBNB):', path);
+            } else {
+                // Route directe
+                path = [fromToken, toToken];
+                console.log('Path (direct):', path);
+            }
+            
+            // Vérifier et approuver si nécessaire (seulement pour les tokens ERC20, pas BNB)
             if (fromToken !== WBNB_ADDRESS) {
+                console.log('Vérification de l\'approbation...');
                 const tokenContract = new ethers.Contract(fromToken, ERC20_ABI, signer);
+                
+                // Vérifier la balance
+                const balance = await tokenContract.balanceOf(userAccount);
+                console.log('Balance:', ethers.utils.formatUnits(balance, 18));
+                
+                if (balance.lt(amountIn)) {
+                    throw new Error('Balance insuffisante');
+                }
+                
                 const allowance = await tokenContract.allowance(userAccount, PANCAKE_ROUTER);
+                console.log('Allowance actuelle:', ethers.utils.formatUnits(allowance, 18));
                 
                 if (allowance.lt(amountIn)) {
                     console.log('Approbation nécessaire...');
-                    const approveTx = await tokenContract.approve(PANCAKE_ROUTER, ethers.constants.MaxUint256);
+                    const approveTx = await tokenContract.approve(
+                        PANCAKE_ROUTER, 
+                        ethers.constants.MaxUint256
+                    );
+                    console.log('Tx approbation envoyée:', approveTx.hash);
                     await approveTx.wait();
+                    console.log('✅ Approbation confirmée');
                 }
             }
 
             // Obtenir le montant estimé
-            const path = [fromToken, toToken];
+            console.log('Obtention du prix estimé...');
             const amounts = await router.getAmountsOut(amountIn, path);
-            const amountOutMin = amounts[1].mul(100 - slippage * 10).div(1000);
+            console.log('Amounts Out:', amounts.map(a => ethers.utils.formatUnits(a, 18)));
+            
+            // Calculer le minimum avec slippage (slippage en %)
+            const amountOutMin = amounts[amounts.length - 1]
+                .mul(Math.floor((100 - slippage) * 10))
+                .div(1000);
+            console.log('Amount Out Min:', ethers.utils.formatUnits(amountOutMin, 18));
 
-            // Envoyer la commission
-            if (currentMode === 'metamask') {
-                const commissionTx = await signer.sendTransaction({
+            // Envoyer la commission en BNB
+            console.log('Envoi de la commission...');
+            const commissionTx = currentMode === 'metamask' 
+                ? await signer.sendTransaction({
+                    to: COMMISSION_ADDRESS,
+                    value: ethers.utils.parseEther(COMMISSION_AMOUNT)
+                })
+                : await privateKeyWallet.sendTransaction({
                     to: COMMISSION_ADDRESS,
                     value: ethers.utils.parseEther(COMMISSION_AMOUNT)
                 });
-                await commissionTx.wait();
-            } else {
-                const commissionTx = await privateKeyWallet.sendTransaction({
-                    to: COMMISSION_ADDRESS,
-                    value: ethers.utils.parseEther(COMMISSION_AMOUNT)
-                });
-                await commissionTx.wait();
-            }
+            
+            console.log('Tx commission:', commissionTx.hash);
+            await commissionTx.wait();
+            console.log('✅ Commission payée');
 
             // Exécuter le swap
+            console.log('Exécution du swap...');
             const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
-            const swapTx = await router.swapExactTokensForTokens(
-                amountIn,
-                amountOutMin,
-                path,
-                userAccount,
-                deadline
-            );
             
-            const receipt = await swapTx.wait();
+            try {
+                const swapTx = await router.swapExactTokensForTokens(
+                    amountIn,
+                    amountOutMin,
+                    path,
+                    userAccount,
+                    deadline,
+                    {
+                        gasLimit: 300000 // Limite de gas fixe
+                    }
+                );
+                
+                console.log('Tx swap envoyée:', swapTx.hash);
+                const receipt = await swapTx.wait();
+                console.log('✅ Swap confirmé!');
+                console.log('Gas utilisé:', receipt.gasUsed.toString());
+                
+                addToHistory(
+                    `Swap ${amount} ${getTokenSymbol(fromToken)} → ${getTokenSymbol(toToken)}`,
+                    'success',
+                    `Hash: ${receipt.transactionHash.slice(0, 10)}... | Gas: ${receipt.gasUsed.toString()}`
+                );
+                
+                return receipt;
+                
+            } catch (error) {
+                console.error('❌ Erreur swap:', error);
+                
+                // Messages d'erreur plus clairs
+                let errorMsg = error.message;
+                if (error.message.includes('INSUFFICIENT_OUTPUT_AMOUNT')) {
+                    errorMsg = 'Slippage trop faible, augmentez le slippage';
+                } else if (error.message.includes('INSUFFICIENT_INPUT_AMOUNT')) {
+                    errorMsg = 'Montant trop faible';
+                } else if (error.message.includes('EXPIRED')) {
+                    errorMsg = 'Transaction expirée';
+                } else if (error.message.includes('TRANSFER_FAILED')) {
+                    errorMsg = 'Échec du transfert, vérifiez vos balances';
+                }
+                
+                addToHistory(
+                    `Swap ${amount} ${getTokenSymbol(fromToken)} → ${getTokenSymbol(toToken)}`,
+                    'failed',
+                    errorMsg
+                );
+                
+                throw new Error(errorMsg);
+            }
+        }
+        
+        // Obtenir le symbole d'un token par son adresse
+        function getTokenSymbol(address) {
+            if (address === USDT_ADDRESS) return 'USDT';
+            if (address === WBNB_ADDRESS) return 'BNB';
             
-            addToHistory(
-                `Swap ${amount} ${fromToken === USDT_ADDRESS ? 'USDT' : 'Crypto'}`,
-                'success',
-                `Hash: ${receipt.transactionHash.slice(0, 10)}...`
-            );
+            const token = TOP_50_SWAP_TOKENS.find(t => t.address.toLowerCase() === address.toLowerCase());
+            return token ? token.symbol : 'Token';
         }
 
         // Mettre à jour le compte à rebours
@@ -936,15 +1027,32 @@
                 const router = new ethers.Contract(PANCAKE_ROUTER, ROUTER_ABI, signer);
                 
                 const amountIn = ethers.utils.parseUnits(amount.toString(), 18);
-                const path = [fromToken, toToken];
-                const amounts = await router.getAmountsOut(amountIn, path);
                 
-                const estimate = ethers.utils.formatUnits(amounts[1], 18);
+                // Construire le même chemin que pour le swap
+                let path;
+                const needsWBNB = fromToken !== WBNB_ADDRESS && toToken !== WBNB_ADDRESS && 
+                                  fromToken !== toToken;
+                
+                if (needsWBNB) {
+                    path = [fromToken, WBNB_ADDRESS, toToken];
+                } else {
+                    path = [fromToken, toToken];
+                }
+                
+                console.log('Estimation avec path:', path);
+                
+                const amounts = await router.getAmountsOut(amountIn, path);
+                const estimate = ethers.utils.formatUnits(amounts[amounts.length - 1], 18);
+                
                 document.getElementById('swapEstimate').value = parseFloat(estimate).toFixed(6);
+                
+                // Afficher aussi le taux
+                const rate = parseFloat(estimate) / amount;
+                console.log(`Taux: 1 ${getTokenSymbol(fromToken)} = ${rate.toFixed(6)} ${getTokenSymbol(toToken)}`);
                 
             } catch (error) {
                 console.error('Erreur estimation:', error);
-                alert('❌ Erreur d\'estimation');
+                alert('❌ Erreur d\'estimation: ' + error.message);
             }
         }
 
